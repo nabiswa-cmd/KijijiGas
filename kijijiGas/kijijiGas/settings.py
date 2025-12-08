@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'home',
+    'suppliers',
+
+
     
     
 ]
@@ -57,7 +60,7 @@ ROOT_URLCONF = 'kijijiGas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR /'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,6 +71,11 @@ TEMPLATES = [
         },
     },
 ]
+
+# Static files
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR /'static']  # Global static folder
+
 
 WSGI_APPLICATION = 'kijijiGas.wsgi.application'
 

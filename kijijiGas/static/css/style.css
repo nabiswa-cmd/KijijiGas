@@ -1,0 +1,36 @@
+:root {
+  --primary-blue: #0D47A1;
+  --bright-blue: #1976D2;
+  --yellow-accent: #FBC02D;
+  --light-yellow: #FFF59D;
+  --soft-grey: #F5F5F5;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+.btn-primary:hover {
+  background-color: var(--bright-blue);
+  border-color: var(--bright-blue);
+}
+
+.btn-accent {
+  background-color: var(--yellow-accent);
+  color: #000;
+}
+
+.btn-accent:hover {
+  background-color: var(--light-yellow);
+  color: #000;
+}
+
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.navbar {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
