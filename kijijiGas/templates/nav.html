@@ -1,17 +1,32 @@
-<nav class="navbar navbar-expand-lg" style="background-color: #0D47A1;">
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0D47A1;">
   <div class="container-fluid">
-    <a class="navbar-brand text-white fw-bold" href="{% url 'home' %}">Kijiji Gas</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+
+    <a class="navbar-brand fw-bold text-white" href="{% url 'home' %}">
+      Kijiji Gas
+    </a>
+
+    <!-- Mobile Toggle Button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
+    <!-- Menu Items -->
     <div class="collapse navbar-collapse" id="nav">
       <ul class="navbar-nav ms-auto">
+
         {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link text-white" href="#">Hi, {{ user.username }}</a></li>
-          <li class="nav-item"><a class="nav-link text-white" href="{% url 'logout' %}">Logout</a></li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#">Hi, {{ user.username }}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'logout' %}">Logout</a>
+          </li>
         {% else %}
-        <li class="nav-item"><a class="nav-link text-white" href="{% url 'supplier_register' %}">Register as Supplier</a></li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'supplier_register' %}">Register as Supplier</a>
+          </li>
         {% endif %}
+
       </ul>
     </div>
   </div>

@@ -1,0 +1,29 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<div class="card p-4">
+    <h3 class="mb-3" style="color: #0D47A1;">Get your gas from {{ supplier.name }}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+             {% if user.is_authenticated %}
+            <label for="quantity" class="form-label">Quantity (Cylinders)</label>
+            <label for="quantity" class="form-label">Quantity (Cylinders)</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1">
+            {% else %}
+            <label for="name">Enter your Name</label>
+            <input type="text" name="customer" id="name"><br><br>
+            <label for="name">Enter your Location</label>
+            <input type="text" name="customer" id="name"><br><br>
+            <label for="quantity" class="form-label">Quantity (Cylinders)</label>
+            <label for="quantity" class="form-label">Quantity (Cylinders)</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1">
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-accent">Place Order</button>
+    </form>
+</div>
+
+{% endblock %}
+

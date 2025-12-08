@@ -1,0 +1,44 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<h2 class="mb-4" style="color: #0D47A1;">Find Suppliers</h2>
+
+<form method="GET" class="row g-2 mb-4">
+    <div class="col-md-6">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search supplier by name">
+    </div>
+    <div class="col-md-4">
+        <input type="text" name="location" value="{{ location }}" class="form-control" placeholder="Enter location">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-accent w-100">Search</button>
+    </div>
+</form>
+
+<div class="row g-3">
+    {% for supplier in suppliers %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card p-3">
+            <h5 class="card-title" style="color: #0D47A1;">{{ supplier.name }}</h5>
+            <p class="card-text mb-1">Location: {{ supplier.location }}</p>
+            <p class="card-text mb-1">Price: KES {{ supplier.refill_price }}</p>
+            <p class="card-text mb-1">Rating: 
+                {% for i in "12345" %}
+                    {% if forloop.counter <= supplier.rating|default:0 %}
+                        <span style="color:#FBC02D;">&#9733;</span>
+                    {% else %}
+                        <span style="color:#ccc;">&#9733;</span>
+                    {% endif %}
+                {% endfor %}
+            </p>
+            <a href="{% url 'supplier_profile' supplier.id %}" class="btn btn-primary mt-2">View Profile</a>
+            <a href="{% url 'place_order' supplier.id %}" class="btn btn-accent mt-2">Place Order</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>No suppliers match your search criteria.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

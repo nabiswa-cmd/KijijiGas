@@ -1,0 +1,23 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<div class="card p-4">
+    <h3 class="card-title mb-2" style="color: #0D47A1;">{{ supplier.name }}</h3>
+    <p class="card-text"><strong>Location:</strong> {{ supplier.location }}</p>
+    <p class="card-text"><strong>Contact:</strong> {{ supplier.contact }}</p>
+    <p class="card-text"><strong>Price per Cylinder:</strong> KES {{ supplier.refill_price }}</p>
+    <p class="card-text"><strong>Rating:</strong> 
+        {% for i in "12345" %}
+            {% if forloop.counter <= supplier.rating|default:0 %}
+                <span style="color:#FBC02D;">&#9733;</span>
+            {% else %}
+                <span style="color:#ccc;">&#9733;</span>
+            {% endif %}
+        {% endfor %}
+    </p>
+
+    <a href="{% url 'place_order' supplier.id %}" class="btn btn-accent mt-3">Place Order</a>
+    <a href="{% url 'rate_supplier' supplier.id %}" class="btn btn-primary mt-3">Rate Supplier</a>
+</div>
+
+{% endblock %}

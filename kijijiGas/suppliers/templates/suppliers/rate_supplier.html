@@ -1,0 +1,28 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<div class="card p-4">
+    <h3 class="mb-3" style="color: #0D47A1;">Rate {{ supplier.name }}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="rating" class="form-label">Rating (1-5)</label>
+            <select class="form-select" id="rating" name="rating" required>
+                <option value="">Select Rating</option>
+                <option value="1">1 - Poor</option>
+                <option value="2">2 - Fair</option>
+                <option value="3">3 - Good</option>
+                <option value="4">4 - Very Good</option>
+                <option value="5">5 - Excellent</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="comment" class="form-label">Comment</label>
+            <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-accent">Submit Rating</button>
+    </form>
+</div>
+
+{% endblock %}
