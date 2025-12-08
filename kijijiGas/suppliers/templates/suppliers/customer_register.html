@@ -1,0 +1,39 @@
+{% extends 'main.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="card p-4 shadow" 
+     style="max-width: 500px; margin: 50px auto; 
+            background-color: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(5px); border-radius: 12px;">
+
+    <h3 class="mb-4 text-primary text-center">Customer Registration</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Form fields with Bootstrap styling -->
+        <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.email.label_tag }}
+            {{ form.email|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.password1.label_tag }}
+            {{ form.password1|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.password2.label_tag }}
+            {{ form.password2|add_class:"form-control" }}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Register</button>
+    </form>
+</div>
+{% endblock %}

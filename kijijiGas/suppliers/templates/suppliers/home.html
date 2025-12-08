@@ -1,25 +1,32 @@
 {% extends 'main.html' %}
-
+{% load static %}
 {% block content %}
 
 <h2 class="mb-4" style="color: #0D47A1;">Find Suppliers</h2>
 
-<form method="GET" class="row g-2 mb-4">
-    <div class="col-md-6">
-        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search supplier by name">
+<div class="hero text-center mb-4" style="padding: 2rem; background: linear-gradient(135deg,#0D47A1,#42A5F5); color:white; border-radius: 12px;">
+    <p>Search suppliers live as you type</p>
+    <div class="search-bar d-flex justify-content-center mt-3">
+        <input id="liveSearch" type="text" class="form-control" placeholder="Enter supplier name or location" style="max-width: 500px;">
     </div>
-    <div class="col-md-4">
-        <input type="text" name="location" value="{{ location }}" class="form-control" placeholder="Enter location">
-    </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-accent w-100">Search</button>
-    </div>
-</form>
+</div>
 
-<div class="row g-3">
+<div class="row g-3" id="supplierResults">
     {% for supplier in suppliers %}
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-4 supplier-card">
         <div class="card p-3">
+
+            <!-- Supplier Image -->
+            {% if supplier.image and supplier.image.url %}
+                <img src="{{ supplier.image.url }}" alt="{{ supplier.name }}"
+                     class="img-fluid rounded mb-2"
+                     style="height: 200px; object-fit: cover; width: 100%;">
+            {% else %}
+                <img src="{% static 'images/default.svg' %}" alt="Default"
+                     class="img-fluid rounded mb-2"
+                     style="height: 200px; object-fit: cover; width: 100%;">
+            {% endif %}
+
             <h5 class="card-title" style="color: #0D47A1;">{{ supplier.name }}</h5>
             <p class="card-text mb-1">Location: {{ supplier.location }}</p>
             <p class="card-text mb-1">Price: KES {{ supplier.refill_price }}</p>
@@ -33,12 +40,30 @@
                 {% endfor %}
             </p>
             <a href="{% url 'supplier_profile' supplier.id %}" class="btn btn-primary mt-2">View Profile</a>
-            <a href="{% url 'place_order' supplier.id %}" class="btn btn-accent mt-2">Place Order</a>
+            <a href="{% url 'place_order' supplier.id %}" class="btn btn-warning mt-2">Place Order</a>
         </div>
     </div>
     {% empty %}
     <p>No suppliers match your search criteria.</p>
     {% endfor %}
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#liveSearch').on('keyup', function() {
+        var query = $(this).val();
+
+        $.ajax({
+            url: "{% url 'home' %}",
+            data: { 'q': query },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(data) {
+                $('#supplierResults').html(data);
+            }
+        });
+    });
+});
+</script>
 
 {% endblock %}

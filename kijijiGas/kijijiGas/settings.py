@@ -26,6 +26,10 @@ SECRET_KEY = 'django-insecure-ab+(zph4rbr7_7@+e9)os%%_x(&e=vq+qr_xgx0nm)35ei(#o3
 DEBUG = True
 
 ALLOWED_HOSTS = []
+import os
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Application definition
@@ -39,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'home',
     'suppliers',
+    'widget_tweaks',
+    
 
 
     

@@ -1,0 +1,2 @@
+Ctrl click to launch VS Code Native REPL
+Use exit() or Ctrl-Z plus Return to exit

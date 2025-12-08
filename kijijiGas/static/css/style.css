@@ -1,36 +1,50 @@
+/* Global Theme Colors */
 :root {
-  --primary-blue: #0D47A1;
-  --bright-blue: #1976D2;
-  --yellow-accent: #FBC02D;
-  --light-yellow: #FFF59D;
-  --soft-grey: #F5F5F5;
+    --primary: #0D47A1;    /* Blue */
+    --accent: #FFC107;     /* Yellow */
+    --text-dark: #0f172a;
+    --muted: #64748b;
+    --card-bg: #ffffff;
 }
 
-.btn-primary {
-  background-color: var(--primary-blue);
-  border-color: var(--primary-blue);
+body {
+    font-family: "Inter", sans-serif;
 }
 
-.btn-primary:hover {
-  background-color: var(--bright-blue);
-  border-color: var(--bright-blue);
+/* Navigation */
+.nav-link {
+    font-weight: 500;
+    color: var(--muted);
 }
 
-.btn-accent {
-  background-color: var(--yellow-accent);
-  color: #000;
+.nav-link:hover {
+    color: var(--primary);
 }
 
-.btn-accent:hover {
-  background-color: var(--light-yellow);
-  color: #000;
+/* Hero Section */
+.hero {
+    padding: 4rem 1rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    margin-top: 2rem;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
 }
 
-.card {
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+/* Feature Cards */
+.feature-card {
+    background: var(--card-bg);
+    padding: 1.8rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: .25s;
+}
+.feature-card:hover {
+    transform: translateY(-5px);
 }
 
-.navbar {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+/* Buttons */
+.btn-warning {
+    background: var(--accent) !important;
+    border: none;
 }

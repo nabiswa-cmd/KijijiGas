@@ -1,33 +1,67 @@
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0D47A1;">
-  <div class="container-fluid">
+<nav class="navbar navbar-expand-lg" style="background: linear-gradient(90deg, #0D47A1, #42A5F5);">
+  <div class="container">
 
+    <!-- Brand -->
     <a class="navbar-brand fw-bold text-white" href="{% url 'home' %}">
-      Kijiji Gas
+      KijijiGas
     </a>
 
-    <!-- Mobile Toggle Button -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+    <!-- Mobile Toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+      aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <!-- Menu Items -->
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav ms-auto">
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center">
 
         {% if user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link text-white" href="#">Hi, {{ user.username }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'logout' %}">Logout</a>
+            <a class="nav-link text-white" href="{% url 'user_logout' %}">Logout</a>
           </li>
         {% else %}
           <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'supplier_register' %}">Register as Supplier</a>
+            <a class="nav-link text-white" href="{% url 'customer_register' %}">Register as Customer</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'user_login' %}">Login</a>
           </li>
         {% endif %}
 
       </ul>
+
+      <!-- CTA Button -->
+      {% if not user.is_authenticated %}
+      <a href="{% url 'supplier_register' %}" class="btn btn-warning ms-3 fw-bold">Become Supplier</a>
+      {% endif %}
     </div>
   </div>
 </nav>
+
+<style>
+  .navbar-brand {
+    font-size: 1.6rem;
+  }
+
+  .nav-link {
+    font-weight: 500;
+    transition: 0.3s;
+  }
+  .nav-link:hover {
+    color: #FBC02D !important; /* accent yellow hover */
+  }
+
+  /* Mobile toggle icon customization */
+  .navbar-toggler {
+    border: none;
+  }
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30'
+      xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 235, 59, 1%29' stroke-width='2'
+      stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/ %3E%3C/svg%3E");
+  }
+</style>
