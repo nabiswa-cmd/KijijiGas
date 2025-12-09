@@ -5,6 +5,7 @@ from .form import SupplierRegistrationForm , CustomerRegisterForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.db.models import Q
 
 # Create your views here.
 def home(request):
@@ -16,11 +17,12 @@ def home(request):
             Q(name__icontains=query) | Q(location__icontains=query)
         )
 
+    # AJAX request
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'suppliers/supplier_cards.html', {'suppliers': suppliers})
     
+    # Normal request
     return render(request, 'suppliers/home.html', {'suppliers': suppliers, 'query': query})
-
 
 def supplier_profile(request, id):
     supplier = get_object_or_404(Suppliers, id = id)
