@@ -1,36 +1,51 @@
-{% for supplier in suppliers %}
-<div class="col-12 col-md-6 col-lg-4 supplier-card">
-    <div class="card p-3">
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ supplier.name }} • Supplier Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container my-5">
 
-        <!-- Supplier Image -->
-        {% if supplier.image %}
-            <img src="{{ supplier.image.url }}" class="img-fluid rounded mb-2"
-                 style="height:150px; object-fit:cover; width:100%;">
-        {% else %}
-            <img src="/static/image/j.jpg" class="img-fluid rounded mb-2"
-                 style="height:150px; object-fit:cover; width:100%;">
-        {% endif %}
+    <div class="card p-4">
+        <div class="row">
+            <div class="col-md-4 text-center">
 
-        <h5 class="card-title" style="color: #0D47A1;">{{ supplier.name }}</h5>
-        <p class="card-text mb-1">Location: {{ supplier.location }}</p>
-        <p class="card-text mb-1">Price: KES {{ supplier.refill_price }}</p>
-
-        <p class="card-text mb-1">Rating:
-            {% for i in "12345" %}
-                {% if forloop.counter <= supplier.rating|default:0 %}
-                    <span style="color:#FBC02D;">&#9733;</span>
+                {% if supplier.image %}
+                    <img src="{{ supplier.image.url }}" alt="{{ supplier.name }}" class="img-fluid rounded mb-3" style="height:200px; object-fit:cover; width:100%;">
                 {% else %}
-                    <span style="color:#ccc;">&#9733;</span>
+                    <img src="{% static 'image/j.jpg' %}" alt="Default image" class="img-fluid rounded mb-3" style="height:200px; object-fit:cover; width:100%;">
                 {% endif %}
-            {% endfor %}
-        </p>
 
-        <a href="{% url 'supplier_profile' supplier.id %}" class="btn btn-primary mt-2">View Profile</a>
-        <a href="{% url 'place_order' supplier.id %}" class="btn btn-warning mt-2">Place Order</a>
+            </div>
 
+            <div class="col-md-8">
+                <h2>{{ supplier.name }}</h2>
+
+                {% if supplier.user %}
+                    <p><strong>Username:</strong> {{ supplier.user.username }}</p>
+                {% endif %}
+
+                <p><strong>Email:</strong> {{ supplier.email|default:"Not provided" }}</p>
+                <p><strong>Phone:</strong> {{ supplier.phone|default:"Not provided" }}</p>
+                <p><strong>Location:</strong> {{ supplier.location|default:"Not provided" }}</p>
+                <p><strong>Refill Price:</strong> KES {{ supplier.refill_price|default:"N/A" }}</p>
+                {% if supplier.gas_brand %}
+                    <p><strong>Gas Brand:</strong> {{ supplier.gas_brand }}</p>
+                {% endif %}
+                <p><strong>Verified:</strong> {{ supplier.verified|yesno:"Yes,No" }}</p>
+
+                <div class="mt-3">
+                    <a href="{% url 'place_order' supplier.id %}" class="btn btn-warning">Place Order</a>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+                </div>
+
+            </div>
+        </div>
     </div>
-</div>
-{% empty %}
-<p>No suppliers found.</p>
-{% endfor %}
 
+</div>
+</body>
+</html>

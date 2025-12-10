@@ -1,0 +1,75 @@
+{% extends 'main.html' %}
+{% block content %}
+<h2>Welcome, {{ supplier.name }}</h2>
+
+<div class="row mt-4">
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <h5>Today's Sales</h5>
+            <p>{{ today_orders }}</p>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <h5>Pending Orders</h5>
+            <p>{{ pending }}</p>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <h5>Delivered</h5>
+            <p>{{ delivered }}</p>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <h5>Earnings Today</h5>
+            <p>KES {{ earnings }}</p>
+        </div>
+    </div>
+
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'supplier_orders' %}" class="btn btn-primary">Manage Orders</a>
+    <a href="{% url 'edit_supplier_profile' %}" class="btn btn-warning">Edit Profile</a>
+    <a href="{% url 'change_price' %}" class="btn btn-info">Change Gas Price</a>
+</div>
+
+<hr class="my-4">
+
+<h4>Latest Orders</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th>Ordered At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in latest_orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.customer.username }}</td>
+            <td>{{ order.customer.email }}</td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">No orders yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

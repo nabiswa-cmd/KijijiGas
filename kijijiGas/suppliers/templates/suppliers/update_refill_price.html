@@ -1,0 +1,11 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h2>Update Refill Price</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="refill_price">New Refill Price:</label>
+    <input type="number" step="0.01" name="refill_price" value="{{ supplier.refill_price }}" required>
+    <button type="submit">Update</button>
+</form>
+{% endblock %}

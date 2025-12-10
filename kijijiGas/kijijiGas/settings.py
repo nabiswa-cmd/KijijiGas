@@ -132,3 +132,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
+MPESA_CONSUMER_KEY = 'pYELJPOi8L0Wtj9LzAAd62WgAdYE6iela5JiCinXQ8UOpwTf'
+MPESA_CONSUMER_SECRET = 'xCsUjoNHQqtWPE5IEdOOt2v2bKNBzeFrAp02fQfmNP2OK9yWxD5IlhKr7KPXzQRe'
+MPESA_SHORTCODE = '174379'
+MPESA_PASSKEY = 'your_passkey'
+MPESA_CALLBACK_URL = 'https://mydomain.com/mpesa-express-simulate/'  # replace with your callback URL
+

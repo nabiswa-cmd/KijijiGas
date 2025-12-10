@@ -20,6 +20,13 @@
           <li class="nav-item">
             <a class="nav-link text-white" href="#">Hi, {{ user.username }}</a>
           </li>
+
+          {% if user.suppliers %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'supplier_dashboard' %}">Dashboard</a>
+          </li>
+          {% endif %}
+
           <li class="nav-item">
             <a class="nav-link text-white" href="{% url 'user_logout' %}">Logout</a>
           </li>

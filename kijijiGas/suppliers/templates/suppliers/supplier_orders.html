@@ -1,0 +1,39 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h2>My Orders</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Qty</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.customer.username }}</td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.status }}</td>
+            <td>
+                {% if order.status == "Pending" %}
+                    <a href="{% url 'mark_on_the_way' order.id %}" class="btn btn-sm btn-info">Start Delivery</a>
+
+                {% elif order.status == "On the Way" %}
+                    <a href="{% url 'mark_delivered' order.id %}" class="btn btn-sm btn-success">Mark Delivered</a>
+                {% else %}
+                    Delivered
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

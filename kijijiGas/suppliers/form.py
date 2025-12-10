@@ -1,9 +1,11 @@
 from django import forms 
 from .models import Suppliers ,User
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
+
 
 class SupplierRegistrationForm(forms.ModelForm):
-
     username = forms.CharField(
         max_length=50,
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -41,15 +43,15 @@ class SupplierRegistrationForm(forms.ModelForm):
 
         return cleaned_data
 
-class CustomerRegisterForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+class CustomerRegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True, help_text="We'll never share your email.")
 
     class Meta:
         model = User
-        fields = ["username", "email", "password"]
+        fields = ("username", "email", "password1", "password2")
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add Bootstrap 'form-control' class to all fields
-        for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
+    def clean_email(self):
+        email = self.cleaned_data.get("email").lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError("An account with this email already exists.")
+        return email

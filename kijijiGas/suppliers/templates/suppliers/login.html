@@ -2,6 +2,14 @@
 
 {% block content %}
 <div class="card p-4 shadow-sm" style="max-width: 400px; margin: auto; margin-top: 50px;">
+     {% if messages %}
+        {% for m in messages %}
+          <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+            {{ m }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
   <h3 class="mb-4 text-primary">Login</h3>
 
   <form method="POST">

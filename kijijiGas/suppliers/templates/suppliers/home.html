@@ -48,6 +48,18 @@
     {% endfor %}
 </div>
 
+<style>
+/* Hover animation for supplier cards */
+.supplier-card .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.supplier-card .card:hover {
+    transform: translateY(-10px) rotateZ(-1deg) scale(1.03);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+}
+</style>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
