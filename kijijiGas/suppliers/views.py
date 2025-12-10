@@ -280,5 +280,5 @@ def mark_delivered(request, order_id):
     order.status = 'delivered'  # or however you track delivery
     order.save()
 
-    return render(request, 'suppliers/payment_form')
+    return redirect('payment_form')
     # replace with the name of your orders page URL
