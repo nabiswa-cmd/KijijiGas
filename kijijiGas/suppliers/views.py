@@ -206,29 +206,31 @@ def payment_form(request):
 
     return render(request, 'suppliers/payment_form.html', {'message': message})
 
-
 def send_stk_push(phone_number, amount):
-    """
-    Function to trigger STK push using MPESA API.
-    Replace with actual logic.
-    """
+
     consumer_key = settings.MPESA_CONSUMER_KEY
     consumer_secret = settings.MPESA_CONSUMER_SECRET
     shortcode = settings.MPESA_SHORTCODE
     passkey = settings.MPESA_PASSKEY
     callback_url = settings.MPESA_CALLBACK_URL
 
-    # Get OAuth token
-    auth_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-    response = requests.get(auth_url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
-    token = response.json()['access_token']
+    # 1. Generate TIMESTAMP
+    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 
-    # Prepare STK push payload
-    stk_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+    # 2. Generate PASSWORD (Shortcode + Passkey + Timestamp)
+    data_to_encode = shortcode + passkey + timestamp
+    encoded_password = base64.b64encode(data_to_encode.encode()).decode()
+
+    # 3. Generate ACCESS TOKEN
+    auth_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+    token_req = requests.get(auth_url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
+    access_token = token_req.json()['access_token']
+
+    # 4. Prepare STK payload
     payload = {
         "BusinessShortCode": shortcode,
-        "Password": passkey,  # usually base64 encoded
-        "Timestamp": "20251210120000",  # generate dynamically
+        "Password": encoded_password,
+        "Timestamp": timestamp,
         "TransactionType": "CustomerPayBillOnline",
         "Amount": amount,
         "PartyA": phone_number,
@@ -239,10 +241,11 @@ def send_stk_push(phone_number, amount):
         "TransactionDesc": "Payment for Gas Delivery"
     }
 
-    headers = {"Authorization": f"Bearer {token}"}
-    stk_response = requests.post(stk_url, json=payload, headers=headers)
-    return stk_response.json()
+    headers = {"Authorization": f"Bearer {access_token}"}
+    stk_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
 
+    response = requests.post(stk_url, json=payload, headers=headers)
+    return response.json()
 @login_required
 def edit_supplier_profile(request):
     supplier = request.user.suppliers
