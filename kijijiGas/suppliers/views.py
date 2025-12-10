@@ -35,7 +35,6 @@ def supplier_profile(request, id):
     supplier = get_object_or_404(Suppliers, id = id)
     return render(request, 'suppliers/supplier_profile.html', {'supplier': supplier})
 
-
 def place_order(request, id):
     supplier = get_object_or_404(Suppliers, id=id)
 
@@ -259,7 +258,7 @@ def edit_supplier_profile(request):
             supplier.image = request.FILES['image']
         supplier.save()
         return redirect('supplier_dashboard')
-    return render(request,'')
+    return render(request,'suppliers/edit_supplier_profile.html')
 @login_required
 def update_refill_price(request):
     supplier = get_object_or_404(Suppliers, user=request.user)

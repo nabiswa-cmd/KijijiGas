@@ -1,3 +1,4 @@
+{% load static %}
 <nav class="navbar navbar-expand-lg" style="background: linear-gradient(90deg, #0D47A1, #42A5F5);">
   <div class="container">
 
@@ -7,29 +8,41 @@
     </a>
 
     <!-- Mobile Toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
-      aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- Menu Items -->
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-center">
 
         {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">Hi, {{ user.username }}</a>
-          </li>
 
-          {% if user.suppliers %}
-          <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'supplier_dashboard' %}">Dashboard</a>
-          </li>
-          {% endif %}
+        <!-- Profile dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="profileDropdown"
+             role="button" data-bs-toggle="dropdown" aria-expanded="false">
 
-          <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'user_logout' %}">Logout</a>
-          </li>
+            <!-- Profile Image -->
+            {% if user.suppliers and user.suppliers.image %}
+              <img src="{{ user.suppliers.image.url }}" class="rounded-circle me-2"
+                   style="width: 35px; height: 35px; object-fit: cover;">
+            {% else %}
+              <img src="{% static 'images/default.png' %}" class="rounded-circle me-2"
+                   style="width: 35px; height: 35px; object-fit: cover;">
+            {% endif %}
+
+            {{ user.username }}
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% if user.suppliers %}
+            <li><a class="dropdown-item" href="{% url 'supplier_dashboard' %}">Dashboard</a></li>
+            <li><a class="dropdown-item" href="{% url 'edit_supplier_profile' %}">Edit Profile</a></li>
+            {% endif %}
+            <li><a class="dropdown-item text-danger" href="{% url 'user_logout' %}">Logout</a></li>
+          </ul>
+        </li>
+
         {% else %}
           <li class="nav-item">
             <a class="nav-link text-white" href="{% url 'customer_register' %}">Register as Customer</a>
@@ -38,17 +51,14 @@
             <a class="nav-link text-white" href="{% url 'user_login' %}">Login</a>
           </li>
         {% endif %}
-
       </ul>
 
-      <!-- CTA Button -->
       {% if not user.is_authenticated %}
       <a href="{% url 'supplier_register' %}" class="btn btn-warning ms-3 fw-bold">Become Supplier</a>
       {% endif %}
     </div>
   </div>
 </nav>
-
 <style>
   .navbar-brand {
     font-size: 1.6rem;
@@ -59,16 +69,17 @@
     transition: 0.3s;
   }
   .nav-link:hover {
-    color: #FBC02D !important; /* accent yellow hover */
+    color: #FBC02D !important;
   }
 
-  /* Mobile toggle icon customization */
   .navbar-toggler {
     border: none;
   }
+
   .navbar-toggler-icon {
     background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30'
-      xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 235, 59, 1%29' stroke-width='2'
-      stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/ %3E%3C/svg%3E");
+      xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 235, 59, 1%29'
+      stroke-width='2' stroke-linecap='round' stroke-miterlimit='10'
+      d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
   }
 </style>

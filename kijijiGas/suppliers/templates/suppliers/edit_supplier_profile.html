@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Supplier Profile</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background: #f7f7f7;
+        }
+        .profile-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 650px;
+            margin: 40px auto;
+        }
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ddd;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+{% include 'nav.html' %}
+<div class="profile-card">
+
+    <h3 class="text-center mb-4">Edit Supplier Profile</h3>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Current Image -->
+        <div class="text-center">
+            {% if request.user.suppliers.image %}
+                <img src="{{ request.user.suppliers.image.url }}" id="previewImage" class="profile-img" alt="Supplier Image">
+            {% else %}
+                <img src="{% static 'images/default-user.png' %}" id="previewImage" class="profile-img" alt="Default Image">
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Change Profile Image</label>
+            <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImage(event)">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Supplier Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Enter supplier name"
+                   value="{{ request.user.suppliers.name }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="text" name="phone" class="form-control" placeholder="Enter phone number"
+                   value="{{ request.user.suppliers.phone }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email (optional)</label>
+            <input type="email" name="email" class="form-control" placeholder="Enter email address"
+                   value="{{ request.user.suppliers.email }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Gas Brand</label>
+            <input type="text" name="gas_brand" class="form-control" placeholder="Enter gas brand"
+                   value="{{ request.user.suppliers.gas_brand }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Refill Price</label>
+            <input type="number" name="refill_price" class="form-control" placeholder="Enter refill price"
+                   value="{{ request.user.suppliers.refill_price }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'supplier_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+
+    </form>
+
+</div>
+
+<!-- JS for Image Preview -->
+<script>
+    function previewImage(event) {
+        let reader = new FileReader();
+        reader.onload = function(){
+            document.getElementById('previewImage').src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+
+</body>
+</html>

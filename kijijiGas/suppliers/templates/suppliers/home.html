@@ -18,14 +18,15 @@
 
             <!-- Supplier Image -->
             {% if supplier.image and supplier.image.url %}
-                <img src="{{ supplier.image.url }}" alt="{{ supplier.name }}"
-                     class="img-fluid rounded mb-2"
-                     style="height: 200px; object-fit: cover; width: 100%;">
-            {% else %}
-                <img src="{% static 'images/default.png' %}" alt="Default"
-                     class="img-fluid rounded mb-2"
-                     style="height: 200px; object-fit: cover; width: 100%;">
-            {% endif %}
+    <img src="{{ supplier.image.url }}" alt="{{ supplier.name }}"
+         class="img-fluid rounded mb-2"
+         style="height: 200px; width: 100%; object-fit: contain; background: #f8f9fa; padding: 10px; border-radius: 10px;">
+{% else %}
+    <img src="{% static 'images/default.png' %}" alt="Default"
+         class="img-fluid rounded mb-2"
+         style="height: 200px; width: 100%; object-fit: contain; background: #f8f9fa; padding: 10px; border-radius: 10px;">
+{% endif %}
+
 
             <h5 class="card-title" style="color: #0D47A1;">{{ supplier.name }}</h5>
             <p class="card-text mb-1">Location: {{ supplier.location }}</p>
