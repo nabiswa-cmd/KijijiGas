@@ -25,11 +25,13 @@
                 {% if order.status == "Pending" %}
                     <a href="{% url 'mark_on_the_way' order.id %}" class="btn btn-sm btn-info">Start Delivery</a>
 
-                {% elif order.status == "On the Way" %}
+                {% elif order.status == "on the Way" %}
                     <a href="{% url 'mark_delivered' order.id %}" class="btn btn-sm btn-success">Mark Delivered</a>
                 {% else %}
                     Delivered
                 {% endif %}
+               
+
             </td>
         </tr>
         {% endfor %}

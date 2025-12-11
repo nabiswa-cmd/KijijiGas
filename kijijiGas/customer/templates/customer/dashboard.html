@@ -1,0 +1,66 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>My Orders</h2>
+
+    {% if orders %}
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Supplier</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Ordered On</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.supplier.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>
+                    {% if order.status == 'Pending' %}
+                        <span class="badge bg-warning">Pending</span>
+                    {% elif order.status == 'On the Way' %}
+                        <span class="badge bg-info">On the Way</span>
+                    {% elif order.status == 'Delivered' %}
+                        <span class="badge bg-success">Delivered</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.payment_status == 'unpaid' %}
+                        <span class="badge bg-danger">Unpaid</span>
+                    {% elif order.payment_status == 'payment_pending' %}
+                        <span class="badge bg-warning">Payment Pending</span>
+                    {% elif order.payment_status == 'paid' %}
+                        <span class="badge bg-success">Paid</span>
+                    {% endif %}
+                </td>
+                <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+                <td>
+                    {% if order.status == 'Delivered' %}
+                        {% if not order.rating_exists %}
+                            <a href="{% url 'rate_supplier' order.id %}" class="btn btn-sm btn-primary">
+                                Rate Supplier
+                            </a>
+                        {% else %}
+                            Rated
+                        {% endif %}
+                    {% else %}
+                        ---
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>You have no orders yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

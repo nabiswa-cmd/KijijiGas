@@ -1,16 +1,94 @@
 {% extends 'main.html' %}
 
 {% block content %}
-<div class="card p-4 shadow-sm" style="max-width: 400px; margin: auto; margin-top: 50px;">
-     {% if messages %}
-        {% for m in messages %}
-          <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
-            {{ m }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-  <h3 class="mb-4 text-primary">Login</h3>
+<style>
+  body {
+    background-color: #f0f4ff; /* light background */
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .auth-card {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 40px 30px;
+    background-color: rgba(255, 255, 255, 0.8); /* semi-transparent card */
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px); /* glassmorphism effect */
+  }
+
+  .auth-card h3 {
+    color: #1e293b; /* dark text */
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+
+  .form-control {
+    background-color: rgba(255, 255, 255, 0.5); /* transparent fieldset */
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: 0.3s;
+  }
+
+  .form-control:focus {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-color: #4f46e5;
+    box-shadow: none;
+    color: #1e293b;
+  }
+
+  .btn-auth {
+    background-color: #4f46e5;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    width: 100%;
+    transition: 0.3s;
+  }
+
+  .btn-auth:hover {
+    background-color: #4338ca;
+  }
+
+  .auth-footer {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  .auth-footer a {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .form-label {
+    color: #1e293b;
+    font-weight: 500;
+  }
+
+  .alert {
+    color: #1e293b;
+  }
+</style>
+
+<div class="auth-card">
+  {% if messages %}
+      {% for m in messages %}
+        <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+          {{ m }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+  {% endif %}
+
+  <h3>Sign In</h3>
 
   <form method="POST">
     {% csrf_token %}
@@ -25,8 +103,11 @@
       <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
     </div>
 
-    <button type="submit" class="btn btn-primary w-100">Login</button>
+    <button type="submit" class="btn-auth mt-3">Sign In</button>
   </form>
-</div>
 
+  <div class="auth-footer">
+    <span>Don't have an account? <a href="{% url 'customer_register' %}">Sign Up</a></span>
+  </div>
+</div>
 {% endblock %}

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Avg
 from django.utils.timezone import now
-
+from django.contrib.auth.models import AbstractUser
 # ---------------- SUPPLIER ----------------
 class Suppliers(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -15,6 +15,7 @@ class Suppliers(models.Model):
     gas_brand = models.CharField(max_length=50, null=True, blank=True)
     verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    Payment_number = models.CharField(max_length=20)
 
     def average_rating(self):
         return Rating.objects.filter(supplier=self).aggregate(avg=Avg('rating'))['avg'] or 0
@@ -66,3 +67,4 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.customer.username} → {self.supplier.name} ({self.rating}/5)"
+

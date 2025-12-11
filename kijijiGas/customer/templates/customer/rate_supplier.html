@@ -1,0 +1,32 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <h2>Rate Supplier: {{ order.supplier.name }}</h2>
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="rating" class="form-label">Rating (1-5)</label>
+            <select name="rating" id="rating" class="form-select" required>
+                <option value="">Select rating</option>
+                {% for i in "12345" %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="comment" class="form-label">Comment (optional)</label>
+            <textarea name="comment" id="comment" class="form-control" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Rating</button>
+        <a href="{% url 'customer_orders' %}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+{% endblock %}

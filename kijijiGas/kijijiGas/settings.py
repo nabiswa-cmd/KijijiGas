@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'home',
     'suppliers',
-    'widget_tweaks',   
+    'widget_tweaks', 
+    'customer'  
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'suppliers.context_processors.unread_orders_count',
+                'suppliers.context_processors.supplier_info',
             ],
         },
     },

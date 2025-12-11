@@ -17,6 +17,29 @@
 
         {% if user.is_authenticated %}
 
+        <!-- Supplier Orders -->
+        {% if user.suppliers %}
+        <li class="nav-item me-3">
+            <a class="nav-link position-relative text-white" href="{% url 'supplier_orders' %}">
+                Orders
+                {% if unread_orders > 0 %}
+                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                    {{ unread_orders }}
+                </span>
+                {% endif %}
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Customer Orders -->
+        {% if not user.suppliers %}
+        <li class="nav-item me-3">
+            <a class="nav-link text-white" href="{% url 'customer_orders' %}">
+                My Orders
+            </a>
+        </li>
+        {% endif %}
+
         <!-- Profile dropdown -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="profileDropdown"
@@ -59,6 +82,7 @@
     </div>
   </div>
 </nav>
+
 <style>
   .navbar-brand {
     font-size: 1.6rem;

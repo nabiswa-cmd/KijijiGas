@@ -3,13 +3,47 @@
 {% block content %}
 
 <h2 class="mb-4" style="color: #0D47A1;">Find Suppliers</h2>
-
-<div class="hero text-center mb-4" style="padding: 2rem; background: linear-gradient(135deg,#0D47A1,#42A5F5); color:white; border-radius: 12px;">
+<div class="hero text-center mb-4">
     <p>Search suppliers live as you type</p>
     <div class="search-bar d-flex justify-content-center mt-3">
         <input id="liveSearch" type="text" class="form-control" placeholder="Enter supplier name or location" style="max-width: 500px;">
     </div>
 </div>
+
+<style>
+/* Hero styling */
+.hero {
+    padding: 2rem;
+    background: linear-gradient(135deg, #0D47A1, #42A5F5);
+    color: white;
+    border-radius: 12px;
+    max-width: 100%;
+    margin: auto;
+    /* Animation */
+    animation: floatY 3s ease-in-out infinite alternate;
+}
+
+/* Up and down floating */
+@keyframes floatY {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+/* Optional: For subtle left-right floating, combine animations */
+@keyframes floatX {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
+}
+
+/* To combine diagonal motion */
+.hero-diagonal {
+    animation: floatY 3s ease-in-out infinite alternate,
+               floatX 4s ease-in-out infinite alternate;
+}
+</style>
+
 
 <div class="row g-3" id="supplierResults">
     {% for supplier in suppliers %}
@@ -18,15 +52,14 @@
 
             <!-- Supplier Image -->
             {% if supplier.image and supplier.image.url %}
-    <img src="{{ supplier.image.url }}" alt="{{ supplier.name }}"
-         class="img-fluid rounded mb-2"
-         style="height: 200px; width: 100%; object-fit: contain; background: #f8f9fa; padding: 10px; border-radius: 10px;">
-{% else %}
-    <img src="{% static 'images/default.png' %}" alt="Default"
-         class="img-fluid rounded mb-2"
-         style="height: 200px; width: 100%; object-fit: contain; background: #f8f9fa; padding: 10px; border-radius: 10px;">
-{% endif %}
-
+                <img src="{{ supplier.image.url }}" alt="{{ supplier.name }}"
+                     class="img-fluid rounded mb-2"
+                     style="height: 200px; width: 100%; object-fit: contain; background: #f8f9fa; padding: 10px; border-radius: 10px;">
+            {% else %}
+                <img src="{% static 'images/default.png' %}" alt="Default"
+                     class="img-fluid rounded mb-2"
+                     style="height: 200px; width: 100%; object-fit: contain; background: #f8f9fa; padding: 10px; border-radius: 10px;">
+            {% endif %}
 
             <h5 class="card-title" style="color: #0D47A1;">{{ supplier.name }}</h5>
             <p class="card-text mb-1">Location: {{ supplier.location }}</p>
@@ -72,7 +105,10 @@ $(document).ready(function() {
             data: { 'q': query },
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             success: function(data) {
-                $('#supplierResults').html(data);
+                // Fade out old results, update content, then fade in
+                $('#supplierResults').fadeOut(150, function() {
+                    $(this).html(data).fadeIn(150);
+                });
             }
         });
     });

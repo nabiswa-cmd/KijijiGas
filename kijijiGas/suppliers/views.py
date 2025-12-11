@@ -13,16 +13,23 @@ import base64
 from django.conf import settings
 import datetime
 from requests.auth import HTTPBasicAuth
-
 def home(request):
     query = request.GET.get('q', '').strip()
-
+    
     suppliers = Suppliers.objects.all()
 
-    if query:  # Now only runs if query is NOT empty
+    if query:  # Filter suppliers if search query exists
         suppliers = suppliers.filter(
             Q(name__icontains=query) | Q(location__icontains=query)
         )
+
+    # Only add pending_orders attribute if user is a supplier
+    if hasattr(request.user, 'suppliers'):
+        for supplier in suppliers:
+            supplier.pending_orders = Order.objects.filter(
+                supplier=supplier,
+                status="Pending"
+            ).count()
 
     # AJAX request
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -110,12 +117,10 @@ def customer_register(request):
     if request.method == "POST":
         form = CustomerRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            # Username and password are already handled by UserCreationForm
-            user.email = form.cleaned_data["email"]
-            user.save()
-            messages.success(request, "Account created — you can now log in.")
-            return redirect("user_login")  # change to your login url name
+            form.save()
+        
+            messages.success(request, "Account created you can now log in.")
+            return redirect("user_login") 
         else:
             # form invalid — fall through to re-render with errors shown
             messages.error(request, "Please fix the errors below.")
@@ -152,91 +157,97 @@ def user_logout(request):
     request.session.flush()
     return redirect("home")
 @login_required
+
+
 def supplier_dashboard(request):
     supplier = get_object_or_404(Suppliers, user=request.user)
 
-    today_orders = Order.objects.filter(
+    # Unread (pending) orders count
+    unread_orders = Order.objects.filter(
+        supplier=supplier,
+        status="Pending"
+    ).count()
+
+    # Today's orders
+    today_orders_qs = Order.objects.filter(
         supplier=supplier,
         created_at__date=datetime.date.today()
     )
+    today_orders = today_orders_qs.count()
 
-    # Calculate earnings safely
-    earnings = sum(o.quantity * supplier.refill_price for o in today_orders)
+    # Earnings today
+    earnings = sum(o.quantity * supplier.refill_price for o in today_orders_qs)
+
+    # Counts
+    pending = Order.objects.filter(supplier=supplier, status="Pending").count()
+    delivered = Order.objects.filter(supplier=supplier, status="delivered").count()
+
+    # Latest 5 orders
+    latest_orders = Order.objects.filter(supplier=supplier).order_by('-created_at')[:5]
 
     context = {
         "supplier": supplier,
-        "today_orders": today_orders.count(),
-        "pending": Order.objects.filter(supplier=supplier, status="Pending").count(),
-        "delivered": Order.objects.filter(supplier=supplier, status="Delivered").count(),
+        "today_orders": today_orders,
+        "pending": pending,
+        "delivered": delivered,
         "earnings": earnings,
-        # Pass latest orders if you want to show them in template
-        "latest_orders": Order.objects.filter(supplier=supplier).order_by('-created_at')[:5],
+        "latest_orders": latest_orders,
+        "unread_orders": unread_orders,
     }
+
     return render(request, "suppliers/supplier_dashboard.html", context)
+
 
 @login_required
 def supplier_orders(request):
+
     supplier = get_object_or_404(Suppliers, user=request.user)
-    orders = Order.objects.filter(supplier=supplier).order_by("-created_at")
-    return render(request, "suppliers/supplier_orders.html", {"orders": orders})
-@login_required
-def mark_on_the_way(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    order.status = "On the Way"
-    order.save()
-
     
-    return redirect("supplier_orders")
-
-
-
-def payment_form(request):
+    orders = Order.objects.filter(supplier=supplier).order_by("-created_at")
+    return render(request, "suppliers/supplier_orders.html", {"orders": orders , 'supplier': supplier} )
+    
+def payment_form(request): 
     message = None
+    
     if request.method == 'POST':
         phone_number = request.POST['phone_number']
         amount = request.POST['amount']
 
-        # Call your MPESA STK push function
+        # Call STK push with supplier ID
         try:
-            response = send_stk_push(phone_number, amount)
+            response = send_stk_push(request, phone_number, amount)
             message = f"STK Push sent successfully: {response}"
         except Exception as e:
             message = f"Error sending STK Push: {str(e)}"
 
-    return render(request, 'suppliers/payment_form.html', {'message': message})
-
-def send_stk_push(phone_number, amount):
-
-    consumer_key = settings.MPESA_CONSUMER_KEY
-    consumer_secret = settings.MPESA_CONSUMER_SECRET
-    shortcode = settings.MPESA_SHORTCODE
-    passkey = settings.MPESA_PASSKEY
-    callback_url = settings.MPESA_CALLBACK_URL
-
-    # 1. Generate TIMESTAMP
+    return render(request, 'suppliers/payment_form.html', {
+        'message': message,
+    })
+@login_required
+def send_stk_push(request,phone_number,amount):
+    
+    supplier_phone = request.user.suppliers.Payment_number
+    supplier_name = request.user.suppliers.name
+    # generate timestamp, password, token etc...
     timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-
-    # 2. Generate PASSWORD (Shortcode + Passkey + Timestamp)
-    data_to_encode = shortcode + passkey + timestamp
+    data_to_encode = settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp
     encoded_password = base64.b64encode(data_to_encode.encode()).decode()
 
-    # 3. Generate ACCESS TOKEN
     auth_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-    token_req = requests.get(auth_url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
+    token_req = requests.get(auth_url, auth=HTTPBasicAuth(settings.MPESA_CONSUMER_KEY, settings.MPESA_CONSUMER_SECRET))
     access_token = token_req.json()['access_token']
 
-    # 4. Prepare STK payload
     payload = {
-        "BusinessShortCode": shortcode,
+        "BusinessShortCode": settings.MPESA_SHORTCODE,
         "Password": encoded_password,
         "Timestamp": timestamp,
         "TransactionType": "CustomerPayBillOnline",
         "Amount": amount,
         "PartyA": phone_number,
-        "PartyB": shortcode,
+        "PartyB": settings.MPESA_SHORTCODE,
         "PhoneNumber": phone_number,
-        "CallBackURL": callback_url,
-        "AccountReference": "Gas Payment",
+        "CallBackURL": settings.MPESA_CALLBACK_URL,
+        "AccountReference": f"{supplier_name} GasPayment",
         "TransactionDesc": "Payment for Gas Delivery"
     }
 
@@ -245,6 +256,7 @@ def send_stk_push(phone_number, amount):
 
     response = requests.post(stk_url, json=payload, headers=headers)
     return response.json()
+
 @login_required
 def edit_supplier_profile(request):
     supplier = request.user.suppliers
@@ -254,6 +266,7 @@ def edit_supplier_profile(request):
         supplier.email = request.POST.get('email')
         supplier.gas_brand = request.POST.get('gas_brand')
         supplier.refill_price = request.POST.get('refill_price')
+        supplier.Payment_number = request.POST.get ('Payment_number')
         if 'image' in request.FILES:
             supplier.image = request.FILES['image']
         supplier.save()
@@ -276,11 +289,25 @@ def update_refill_price(request):
 
     # Optional: render a simple form if you want GET to show a page
     return render(request, "suppliers/update_refill_price.html", {"supplier": supplier})
+  
+def unread_orders_count(request):
+    if request.user.is_authenticated and hasattr(request.user, 'suppliers'):
+        supplier = request.user.suppliers
+        unread_orders = Order.objects.filter(supplier=supplier, status="Pending").count()
+        return {'unread_orders': unread_orders}
+    return {'unread_orders': 0}
 
-def mark_delivered(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    order.status = 'delivered'  # or however you track delivery
+@login_required
+def mark_on_the_way(request, order_id):
+    order = get_object_or_404(Order, id=order_id, supplier=request.user.suppliers)
+    order.status = "on the Way"  # Match exactly the STATUS_CHOICES
     order.save()
+    return redirect("supplier_orders")
 
-    return redirect('payment_form')
-    # replace with the name of your orders page URL
+
+@login_required
+def mark_delivered(request, order_id):
+    order = get_object_or_404(Order, id=order_id, supplier=request.user.suppliers)
+    order.status = "Delivered"  # Match exactly the STATUS_CHOICES
+    order.save()
+    return redirect("payment_form")

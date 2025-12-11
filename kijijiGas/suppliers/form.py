@@ -21,7 +21,7 @@ class SupplierRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = Suppliers
-        fields = ['name', 'email', 'phone', 'location', 'refill_price', 'gas_brand','image']
+        fields = ['name', 'email', 'phone', 'location', 'refill_price', 'gas_brand','image','Payment_number']
 
         widgets = {
             'name': forms.TextInput(attrs={'class':'form-control'}),
@@ -30,6 +30,7 @@ class SupplierRegistrationForm(forms.ModelForm):
             'location': forms.TextInput(attrs={'class':'form-control'}),
             'refill_price': forms.NumberInput(attrs={'class':'form-control'}),
             'gas_brand': forms.TextInput(attrs={'class':'form-control'}),
+            'Payment_number': forms.TextInput(attrs={'class':'form-control'}),
         }
 
     # Validate that passwords match
@@ -45,6 +46,7 @@ class SupplierRegistrationForm(forms.ModelForm):
 
 class CustomerRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True, help_text="We'll never share your email.")
+    
 
     class Meta:
         model = User
@@ -55,3 +57,4 @@ class CustomerRegisterForm(UserCreationForm):
         if User.objects.filter(email__iexact=email).exists():
             raise ValidationError("An account with this email already exists.")
         return email
+
