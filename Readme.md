@@ -39,7 +39,7 @@ kijijiGas is a complete digital platform that connects LPG suppliers with nearby
 
 ## 🧱 System Architecture
 
-**Backend:** Python Flask  
+**Backend:** Python Django
 **Database:** PostgreSQL  
 **Frontend:** HTML + modern responsive UI (Bootstrap / Tailwind)  
 **Payments:** M-Pesa Daraja STK Push  
