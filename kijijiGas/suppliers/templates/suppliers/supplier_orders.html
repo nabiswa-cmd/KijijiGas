@@ -20,19 +20,45 @@
             <td>{{ order.id }}</td>
             <td>{{ order.customer.username }}</td>
             <td>{{ order.quantity }}</td>
-            <td>{{ order.status }}</td>
+
+            <!-- FIXED STATUS DISPLAY -->
+            <td>
+                {% if order.status == "Pending" %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+
+                {% elif order.status == "on the Way" %}
+                    <span class="badge bg-info">On the Way</span>
+
+                {% elif order.status == "Delivered" %}
+                    <span class="badge bg-success">Delivered</span>
+
+                {% elif order.status == "Cancelled" %}
+                    <span class="badge bg-danger">Cancelled</span>
+
+                {% else %}
+                    <span class="badge bg-secondary">{{ order.status }}</span>
+                {% endif %}
+            </td>
+
+            <!-- ACTION BUTTONS -->
             <td>
                 {% if order.status == "Pending" %}
                     <a href="{% url 'mark_on_the_way' order.id %}" class="btn btn-sm btn-info">Start Delivery</a>
 
                 {% elif order.status == "on the Way" %}
                     <a href="{% url 'mark_delivered' order.id %}" class="btn btn-sm btn-success">Mark Delivered</a>
-                {% else %}
-                    Delivered
-                {% endif %}
-               
 
+                {% elif order.status == "Delivered" %}
+                    Delivered
+
+                {% elif order.status == "Cancelled" %}
+                    Cancelled
+
+                {% else %}
+                    ---
+                {% endif %}
             </td>
+
         </tr>
         {% endfor %}
     </tbody>

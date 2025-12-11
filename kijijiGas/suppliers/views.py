@@ -311,3 +311,26 @@ def mark_delivered(request, order_id):
     order.status = "Delivered"  # Match exactly the STATUS_CHOICES
     order.save()
     return redirect("payment_form")
+
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    # Customer can cancel only their own orders
+    if order.customer != request.user:
+        messages.error(request, "You cannot cancel another user's order.")
+        return redirect("customer_orders")
+
+    # Allowed statuses
+    cancellable_status = ["Pending", "On the Way"]
+
+    if order.status not in cancellable_status:
+        messages.error(request, "This order can no longer be cancelled.")
+        return redirect("customer_orders")
+
+    # Cancel order
+    order.status = "Cancelled"
+    order.save()
+
+    messages.success(request, "Your order has been cancelled successfully.")
+    return redirect("customer_orders")

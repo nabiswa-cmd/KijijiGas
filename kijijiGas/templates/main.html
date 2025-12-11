@@ -9,39 +9,39 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <style>
-    /* Root variables for colors */
     :root {
-      --primary: #0D47A1;   /* Blue */
-      --accent: #FBC02D;    /* Yellow */
+      --primary: #0D47A1;
+      --accent: #FBC02D;
       --bg-light: #F5F5F5;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
     }
 
-    /* BODY + BACKGROUND */
     body {
-      background-color: #f0f4ff; /* light background */
+      background-color: #f0f4ff;
       font-family: 'Segoe UI', sans-serif;
       position: relative;
-      overflow: auto; /* allow scrolling */
+      overflow: auto;
       min-height: 100vh;
     }
 
-    /* Abstract background circles */
+    /* Background Circles */
     .bg-circle {
-      position: fixed; /* stays in place while scrolling */
+      position: fixed;
       border-radius: 50%;
-      opacity: 0.3;
+      opacity: 0.30;
       z-index: 0;
-      animation: float 6s ease-in-out infinite;
+      animation-duration: 7s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
     }
 
+    /* Original Circles */
     .circle-blue {
       width: 250px;
       height: 250px;
       background: var(--primary);
       top: -50px;
       left: -50px;
+      animation-name: float1;
     }
 
     .circle-yellow {
@@ -50,12 +50,64 @@
       background: var(--accent);
       bottom: -30px;
       right: -30px;
+      animation-name: float2;
     }
 
-    /* Floating animation for subtle movement */
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(20px); }
+    /* New Circles */
+    .circle-blue-small {
+      width: 120px;
+      height: 120px;
+      background: var(--primary);
+      top: 40%;
+      left: 10%;
+      opacity: 0.25;
+      animation-name: float3;
+    }
+
+    .circle-yellow-large {
+      width: 300px;
+      height: 300px;
+      background: var(--accent);
+      top: 70%;
+      right: 20%;
+      opacity: 0.25;
+      animation-name: float4;
+    }
+
+    .circle-faint {
+      width: 180px;
+      height: 180px;
+      background: #90caf9;
+      top: 20%;
+      right: 5%;
+      opacity: 0.18;
+      animation-name: float5;
+    }
+
+    /* Animations to make each circle move differently */
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(20px, 25px); }
+    }
+
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(-15px, -20px); }
+    }
+
+    @keyframes float3 {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(25px, -10px); }
+    }
+
+    @keyframes float4 {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(-30px, 15px); }
+    }
+
+    @keyframes float5 {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(20px, -20px); }
     }
 
     /* NAVBAR */
@@ -81,7 +133,6 @@
       color: var(--accent);
     }
   </style>
-
 </head>
 
 <body>
@@ -89,6 +140,9 @@
   <!-- Background Circles -->
   <div class="bg-circle circle-blue"></div>
   <div class="bg-circle circle-yellow"></div>
+  <div class="bg-circle circle-blue-small"></div>
+  <div class="bg-circle circle-yellow-large"></div>
+  <div class="bg-circle circle-faint"></div>
 
   {% include 'nav.html' %}
 

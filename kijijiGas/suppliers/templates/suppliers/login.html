@@ -3,69 +3,83 @@
 {% block content %}
 <style>
   body {
-    background-color: #f0f4ff; /* light background */
+    background-color: #f0f4ff;
     font-family: 'Segoe UI', sans-serif;
   }
 
+  /* Glassmorphism Login Card */
   .auth-card {
     max-width: 400px;
     margin: 80px auto;
     padding: 40px 30px;
-    background-color: rgba(255, 255, 255, 0.8); /* semi-transparent card */
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    backdrop-filter: blur(10px); /* glassmorphism effect */
+
+    /* **Glass effect** */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+
+    position: relative;
+    z-index: 10;
   }
 
   .auth-card h3 {
-    color: #1e293b; /* dark text */
+    color: #1e293b;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 30px;
+    letter-spacing: 0.5px;
   }
 
+  /* Inputs */
   .form-control {
-    background-color: rgba(255, 255, 255, 0.5); /* transparent fieldset */
-    border: 1px solid #cbd5e1;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     color: #1e293b;
-    border-radius: 8px;
-    padding: 10px 12px;
-    transition: 0.3s;
+    border-radius: 10px;
+    padding: 11px 14px;
+    transition: 0.3s ease;
   }
 
   .form-control:focus {
-    background-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.45);
     border-color: #4f46e5;
-    box-shadow: none;
+    box-shadow: 0 0 8px rgba(79, 70, 229, 0.4);
     color: #1e293b;
   }
 
+  /* Button */
   .btn-auth {
-    background-color: #4f46e5;
+    background: linear-gradient(90deg, #4f46e5, #6366f1);
     color: #fff;
-    font-weight: bold;
+    font-weight: 600;
     border: none;
-    border-radius: 8px;
-    padding: 10px;
+    border-radius: 10px;
+    padding: 12px;
     width: 100%;
     transition: 0.3s;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
   }
 
   .btn-auth:hover {
-    background-color: #4338ca;
+    background: linear-gradient(90deg, #4338ca, #4f46e5);
+    transform: translateY(-2px);
   }
 
   .auth-footer {
     text-align: center;
     margin-top: 15px;
     font-size: 0.9rem;
-    color: #64748b;
+    color: #475569;
   }
 
   .auth-footer a {
     color: #4f46e5;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .form-label {
@@ -74,6 +88,10 @@
   }
 
   .alert {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
     color: #1e293b;
   }
 </style>
@@ -110,4 +128,5 @@
     <span>Don't have an account? <a href="{% url 'customer_register' %}">Sign Up</a></span>
   </div>
 </div>
+
 {% endblock %}

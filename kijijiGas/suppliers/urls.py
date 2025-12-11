@@ -19,7 +19,9 @@ urlpatterns = [
     path('orders/<int:order_id>/on-the-way/', views.mark_on_the_way, name='mark_on_the_way'),
     path('update-price/', views.update_refill_price, name='change_price'),
     path('orders/mark-delivered/<int:order_id>/', views.mark_delivered, name='mark_delivered'),
-    path('payment', views.payment_form, name='payment_form')
+    path('payment', views.payment_form, name='payment_form'),
+    path("cancel_order/<int:order_id>/", views.cancel_order, name="cancel_order"),
+
 ]
 
 if settings.DEBUG:
