@@ -8,7 +8,16 @@
       <h4 class="mb-0">Create Customer Account</h4>
     </div>
 
-    <div class="card-body" style="background: #fff;">
+    <div class="card-body " style="background: #fff; background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(-2px);
+    -webkit-backdrop-filter: blur(-2px);
+
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+
+    position: relative;
+    z-index: 10;">
       {% if messages %}
         {% for m in messages %}
           <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
