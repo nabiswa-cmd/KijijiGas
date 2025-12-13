@@ -1,36 +1,42 @@
 {% extends 'main.html' %}
-{% load static %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Form</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-  <div class="container mt-5">
-    <h2>Trigger Customer Payment (STK Push)</h2>
-    <form method="POST">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label class="form-label">Customer Phone Number</label>
-        <input type="text" name="phone_number" class="form-control" placeholder="2547XXXXXXXX" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Amount (KES)</label>
-        <input type="number" name="amount" class="form-control" placeholder="Amount to collect" required>
-      </div>
-   
-      <button type="submit" class="btn btn-success">Send STK Push</button>
-      <a href="{% url 'supplier_dashboard' %}" class="btn btn-secondary">Cancel</a>
-    </form>
 
-    {% if message %}
-      <div class="alert alert-info mt-3">{{ message }}</div>
-    {% endif %}
-  </div>
-</body>
-</html>
-{%endblock%}
+<div class="container mt-5">
+  <h3>Complete Payment</h3>
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Customer Phone</label>
+      <input type="text"
+             name="customer_phone"
+             class="form-control"
+             value="{{ order.customer_phone }}">
+    </div>
+
+    <p><strong>Total Amount:</strong> KES {{ order.total_amount }}</p>
+
+    <div class="mb-3">
+      <label class="form-label">Cash Paid</label>
+      <input type="number" step="0.01" name="cash_paid"
+             class="form-control" value="0">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">MPESA / Till Paid</label>
+      <input type="number" step="0.01" name="mpesa_paid"
+             class="form-control" value="0">
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      Complete Payment
+    </button>
+
+    <a href="{% url 'supplier_orders' %}" class="btn btn-secondary">
+      Cancel
+    </a>
+  </form>
+</div>
+
+{% endblock %}

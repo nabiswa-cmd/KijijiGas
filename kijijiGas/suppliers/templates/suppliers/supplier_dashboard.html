@@ -89,7 +89,7 @@
             <tr>
                 <th>Order ID</th>
                 <th>Customer</th>
-                <th>Email</th>
+                <th>Location</th>
                 <th>Quantity</th>
                 <th>Status</th>
                 <th>Ordered At</th>
@@ -99,8 +99,8 @@
             {% for order in latest_orders %}
             <tr>
                 <td>{{ order.id }}</td>
-                <td>{{ order.customer.username }}</td>
-                <td>{{ order.customer.email }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.customer_location }}</td>
                 <td>{{ order.quantity }}</td>
 
                 <!-- Status Badge -->

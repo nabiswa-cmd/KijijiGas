@@ -3,7 +3,7 @@ from .models import Suppliers ,User
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-
+from django import forms
 
 class SupplierRegistrationForm(forms.ModelForm):
     username = forms.CharField(
@@ -45,16 +45,31 @@ class SupplierRegistrationForm(forms.ModelForm):
         return cleaned_data
 
 class CustomerRegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True, help_text="We'll never share your email.")
-    
+    email = forms.EmailField(required=True)
+
+    county = forms.CharField(max_length=100, required=True)
+    area = forms.CharField(max_length=100, required=True)
+    exact_location = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        required=False
+    )
 
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2")
+        fields = (
+            "username",
+            "email",
+            "password1",
+            "password2",
+            "county",
+            "area",
+            "exact_location",
+        )
 
     def clean_email(self):
         email = self.cleaned_data.get("email").lower()
         if User.objects.filter(email__iexact=email).exists():
             raise ValidationError("An account with this email already exists.")
         return email
+
 

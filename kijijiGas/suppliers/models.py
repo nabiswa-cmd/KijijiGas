@@ -28,33 +28,52 @@ class Suppliers(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.location})"
+class Employee(models.Model):
+    supplier = models.ForeignKey(Suppliers, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    is_available = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.supplier.name})"
 
 
 # ---------------- ORDER ----------------
 class Order(models.Model):
-    STATUS_CHOICES = [
-        ("Pending", "Pending"),
-        ("On the Way", "On the Way"),
-        ("Delivered", "Delivered"),
-    ]
-    PAYMENT_CHOICES = [
-        ("unpaid", "Unpaid"),
-        ("payment_pending", "Payment Pending"),
-        ("paid", "Paid"),
-    ]
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    customer_phone = models.CharField(max_length=15)
+    customer_location = models.CharField(max_length=200,null=True)
 
-    customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    customer_name = models.CharField(max_length=255, blank=True, null=True)  # for unregistered customers
-    customer_email = models.EmailField(blank=True, null=True)
-    customer_phone = models.CharField(max_length=15)  # phone entered by staff
     supplier = models.ForeignKey(Suppliers, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default="unpaid")
+
+    cash_paid = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0
+    )
+    mpesa_paid = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0
+    )
+
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("unpaid", "Unpaid"),
+            ("partial", "Partial"),
+            ("paid", "Paid"),
+        ],
+        default="unpaid"
+    )
+
+    status = models.CharField(max_length=20, default="Pending")
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Order #{self.id} - {self.customer_name or (self.customer.username if self.customer else 'Guest')}"
+    @property
+    def total_paid(self):
+        return self.cash_paid + self.mpesa_paid
+
+    @property
+    def total_amount(self):
+        return self.quantity * self.supplier.refill_price
 
 
 # ---------------- RATING ----------------
@@ -68,3 +87,16 @@ class Rating(models.Model):
     def __str__(self):
         return f"{self.customer.username} → {self.supplier.name} ({self.rating}/5)"
 
+class SupplierWallet(models.Model):
+    supplier = models.OneToOneField(Suppliers, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def credit(self, amount):
+        self.balance += amount
+        self.save()
+
+    def debit(self, amount):
+        if amount <= self.balance:
+            self.balance -= amount
+            self.save()

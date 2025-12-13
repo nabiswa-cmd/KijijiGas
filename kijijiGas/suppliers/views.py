@@ -1,18 +1,23 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Suppliers, Order, Rating
+from .models import Suppliers, Order, Rating,Employee,SupplierWallet
 from django.contrib.auth.decorators import login_required
 from .form import SupplierRegistrationForm , CustomerRegisterForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
-from django.shortcuts import render, redirect
 from django.utils.timezone import now
 import requests
 import base64
 from django.conf import settings
 import datetime
 from requests.auth import HTTPBasicAuth
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from decimal import Decimal
+import json
+from customer.models import CustomerProfile
+
 def home(request):
     query = request.GET.get('q', '').strip()
     
@@ -50,21 +55,43 @@ def place_order(request, id):
 
         if request.user.is_authenticated:
             # Logged-in user
-            customer = request.user
+            customer_name = request.user.get_full_name() or request.user.username
+
+            try:
+                profile = request.user.customerprofile
+                customer_phone = getattr(profile, 'phone', '')
+                customer_location = (
+                    profile.exact_location
+                    or f"{profile.area}, {profile.county}"
+                )
+            except CustomerProfile.DoesNotExist:
+                customer_phone = ''
+                customer_location = ''
+
         else:
-            # Anonymous user - get name/email/phone from form
-            name = request.POST.get('name')
-            email = request.POST.get('email')
-            phone = request.POST.get('phone')
+            # Anonymous user
+            customer_name = request.POST.get('name')
+            customer_phone = request.POST.get('phone')
+            customer_location = request.POST.get('location')
 
-            # Option 1: Save anonymous users in User table as "guest"
-            customer, created = User.objects.get_or_create(
-                username=email,  # using email as username
-                defaults={'first_name': name, 'email': email}
+        if not customer_location:
+            return render(
+                request,
+                'suppliers/order_form.html',
+                {
+                    'supplier': supplier,
+                    'error': 'Location is required to place an order'
+                }
             )
-            # Optionally, you can store phone somewhere (like in a profile or another table)
 
-        Order.objects.create(customer=customer, supplier=supplier, quantity=quantity)
+        Order.objects.create(
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            customer_location=customer_location,
+            supplier=supplier,
+            quantity=quantity
+        )
+
         return redirect('home')
 
     return render(request, 'suppliers/order_form.html', {'supplier': supplier})
@@ -112,17 +139,23 @@ def supplier_register(request):
         form = SupplierRegistrationForm()
 
     return render(request, "suppliers/supplier_register.html", {"form": form})
-
 def customer_register(request):
     if request.method == "POST":
         form = CustomerRegisterForm(request.POST)
         if form.is_valid():
-            form.save()
-        
-            messages.success(request, "Account created you can now log in.")
-            return redirect("user_login") 
+            user = form.save()
+
+            # ✅ Create customer profile with location
+            CustomerProfile.objects.create(
+                user=user,
+                county=form.cleaned_data["county"],
+                area=form.cleaned_data["area"],
+                exact_location=form.cleaned_data.get("exact_location", "")
+            )
+
+            messages.success(request, "Account created successfully. You can now log in.")
+            return redirect("user_login")
         else:
-            # form invalid — fall through to re-render with errors shown
             messages.error(request, "Please fix the errors below.")
     else:
         form = CustomerRegisterForm()
@@ -206,57 +239,101 @@ def supplier_orders(request):
     orders = Order.objects.filter(supplier=supplier).order_by("-created_at")
     return render(request, "suppliers/supplier_orders.html", {"orders": orders , 'supplier': supplier} )
     
-def payment_form(request): 
+def payment_form(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    amount = order.quantity * order.supplier.refill_price
     message = None
-    
-    if request.method == 'POST':
-        phone_number = request.POST['phone_number']
-        amount = request.POST['amount']
 
-        # Call STK push with supplier ID
-        try:
-            response = send_stk_push(request, phone_number, amount)
-            message = f"STK Push sent successfully: {response}"
-        except Exception as e:
-            message = f"Error sending STK Push: {str(e)}"
+    if request.method == "POST":
+        method = request.POST.get("payment_method")
 
-    return render(request, 'suppliers/payment_form.html', {
-        'message': message,
+        # 🔹 CASH PAYMENT
+        if method == "cash":
+            order.payment_method = "cash"
+            order.amount_paid = amount
+            order.payment_status = "paid"
+            order.save()
+
+            # credit supplier wallet
+            wallet, _ = SupplierWallet.objects.get_or_create(
+                supplier=order.supplier
+            )
+            wallet.credit(amount)
+
+            return redirect("supplier_orders")
+
+        # 🔹 MPESA PAYMENT
+        if method == "mpesa":
+            order.payment_method = "mpesa"
+            order.amount_paid = amount
+            order.payment_status = "payment_pending"
+            order.save()
+
+            send_stk_push(
+                request,
+                phone_number=order.customer_phone,
+                amount=amount
+            )
+
+            message = "STK Push sent to customer."
+
+    return render(request, "suppliers/payment_form.html", {
+        "order": order,
+        "amount": amount,
+        "message": message
     })
+
 @login_required
-def send_stk_push(request,phone_number,amount):
-    
-    supplier_phone = request.user.suppliers.Payment_number
-    supplier_name = request.user.suppliers.name
-    # generate timestamp, password, token etc...
+def send_stk_push(order, phone_number, amount):
+    """
+    Sends STK Push for a specific order.
+    """
+
+    supplier = order.supplier
+    supplier_name = supplier.name
+
+    # 1️⃣ Generate timestamp & password
     timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     data_to_encode = settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp
     encoded_password = base64.b64encode(data_to_encode.encode()).decode()
 
+    # 2️⃣ Get access token
     auth_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-    token_req = requests.get(auth_url, auth=HTTPBasicAuth(settings.MPESA_CONSUMER_KEY, settings.MPESA_CONSUMER_SECRET))
-    access_token = token_req.json()['access_token']
+    auth_response = requests.get(
+        auth_url,
+        auth=HTTPBasicAuth(
+            settings.MPESA_CONSUMER_KEY,
+            settings.MPESA_CONSUMER_SECRET
+        )
+    )
 
+    access_token = auth_response.json().get('access_token')
+
+    # 3️⃣ STK payload
     payload = {
         "BusinessShortCode": settings.MPESA_SHORTCODE,
         "Password": encoded_password,
         "Timestamp": timestamp,
         "TransactionType": "CustomerPayBillOnline",
-        "Amount": amount,
+        "Amount": int(amount),
         "PartyA": phone_number,
         "PartyB": settings.MPESA_SHORTCODE,
         "PhoneNumber": phone_number,
         "CallBackURL": settings.MPESA_CALLBACK_URL,
-        "AccountReference": f"{supplier_name} GasPayment",
-        "TransactionDesc": "Payment for Gas Delivery"
+        "AccountReference": f"ORDER-{order.id}",
+        "TransactionDesc": f"Gas payment to {supplier_name}"
     }
 
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+
     stk_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
 
     response = requests.post(stk_url, json=payload, headers=headers)
-    return response.json()
 
+    return response.json()
 @login_required
 def edit_supplier_profile(request):
     supplier = request.user.suppliers
@@ -310,19 +387,13 @@ def mark_delivered(request, order_id):
     order = get_object_or_404(Order, id=order_id, supplier=request.user.suppliers)
     order.status = "Delivered"  # Match exactly the STATUS_CHOICES
     order.save()
-    return redirect("payment_form")
+    return redirect("payment_form", order_id=order.id)
 
 @login_required
 def cancel_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-
-    # Customer can cancel only their own orders
-    if order.customer != request.user:
-        messages.error(request, "You cannot cancel another user's order.")
-        return redirect("customer_orders")
-
     # Allowed statuses
-    cancellable_status = ["Pending", "On the Way"]
+    cancellable_status = ["Pending"]
 
     if order.status not in cancellable_status:
         messages.error(request, "This order can no longer be cancelled.")
@@ -334,3 +405,77 @@ def cancel_order(request, order_id):
 
     messages.success(request, "Your order has been cancelled successfully.")
     return redirect("customer_orders")
+
+def cancel_order1 (request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    # Allowed statuses
+    cancellable_status = ["Pending","on the Way"]
+
+    if order.status not in cancellable_status:
+        messages.error(request, "This order can no longer be cancelled.")
+        return redirect("supplier_orders")
+
+    # Cancel order
+    order.status = "Cancelled"
+    order.save()
+
+    messages.success(request, "Your order has been cancelled successfully.")
+    return redirect("supplier_orders")
+
+def start_delivery(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if request.method == "POST":
+        employee_id = request.POST.get("employee")
+        if employee_id:
+            order.employee = Employee.objects.get(id=employee_id)
+        order.status = "On the Way"
+        order.save()
+
+    return redirect('supplier_orders')
+
+def mark_cash_paid(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    order.payment_method = "cash"
+    order.payment_status = "paid"
+    order.amount_paid = order.total_price()
+    order.paid_at = now()
+    order.save()
+
+    return redirect('supplier_orders')
+
+@csrf_exempt
+def mpesa_callback(request):
+    data = json.loads(request.body)
+
+    try:
+        callback = data['Body']['stkCallback']
+
+        if callback['ResultCode'] == 0:
+            metadata = callback['CallbackMetadata']['Item']
+
+            amount = Decimal(next(i['Value'] for i in metadata if i['Name'] == 'Amount'))
+            phone = next(i['Value'] for i in metadata if i['Name'] == 'PhoneNumber')
+            receipt = next(i['Value'] for i in metadata if i['Name'] == 'MpesaReceiptNumber')
+
+            # match order
+            order = Order.objects.get(
+                customer_phone=phone,
+                payment_status='payment_pending'
+            )
+
+            order.payment_status = 'paid'
+            order.amount_paid = amount
+            order.save()
+
+            # 🔥 CREDIT WALLET HERE (ONLY HERE)
+            wallet, _ = SupplierWallet.objects.get_or_create(
+                supplier=order.supplier
+            )
+            wallet.credit(amount)
+
+        return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

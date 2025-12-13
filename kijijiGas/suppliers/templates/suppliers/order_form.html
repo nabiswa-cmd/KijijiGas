@@ -1,30 +1,68 @@
 {% extends 'main.html' %}
 {% block content %}
 
-<div class="card p-4">
-    <h3 class="mb-3" style="color: #0D47A1;">Get your gas from {{ supplier.name }}</h3>
+<div class="card p-4 shadow-sm" style="max-width: 500px; margin: auto;">
+    <h3 class="mb-3 text-center" style="color:#0D47A1;">
+        Get your gas from {{ supplier.name }}
+    </h3>
 
-    <form method="post">
-    {% csrf_token %}
-
-    {% if not request.user.is_authenticated %}
-        <label>Name:</label>
-        <input type="text" name="name" required>
-        
-        <label>Email:</label>
-        <input type="email" name="email" required>
-
-        <label>Phone:</label>
-        <input type="text" name="phone" required>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
 
-    <label>Quantity:</label>
-    <input type="number" name="quantity" value="1" min="1">
+    <form method="post">
+        {% csrf_token %}
 
-    <button type="submit">Place Order</button>
-</form>
+        {% if request.user.is_authenticated %}
+            <!-- Logged-in user info -->
+            <div class="mb-3">
+                <label class="form-label">Customer</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ request.user.username }}"
+                       readonly>
+            </div>
 
+            <div class="mb-3">
+                <label class="form-label">Delivery Location</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ request.user.customerprofile.area }}, {{ request.user.customerprofile.county }}"
+                       readonly>
+            </div>
+
+        {% else %}
+            <!-- Guest user form -->
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input type="text" name="location" class="form-control" required>
+            </div>
+        {% endif %}
+
+        <div class="mb-3">
+            <label class="form-label">Quantity</label>
+            <input type="number"
+                   name="quantity"
+                   class="form-control"
+                   value="1"
+                   min="1"
+                   required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Place Order
+        </button>
+    </form>
 </div>
 
 {% endblock %}
-

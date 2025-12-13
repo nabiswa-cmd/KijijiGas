@@ -2,7 +2,7 @@ from django.shortcuts import render,get_object_or_404,redirect
 from suppliers.models import Order  # Import the Order model from supplier app
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
-from suppliers.models import Order, Rating
+from suppliers.models import Order, Rating ,Suppliers
 # Create your views here.
 @login_required
 def customer_orders(request):
@@ -12,13 +12,13 @@ def customer_orders(request):
         supplier=OuterRef('supplier')
     )
     
-    orders = Order.objects.filter(customer=request.user).annotate(
+    orders = Order.objects.filter(customer_name=request.user).annotate(
         rating_exists=Exists(ratings)
     ).order_by('-created_at')
     
     return render(request, 'customer/customer_orders.html', {'orders': orders})
 def rate_supplier(request, order_id):
-    order = get_object_or_404(Order, id=order_id, customer=request.user)
+    order = get_object_or_404(Order, id=order_id, customer_name=request.user)
 
     # Only allow rating if delivered
     if order.status != 'Delivered':
@@ -48,3 +48,13 @@ def rate_supplier(request, order_id):
     return render(request, 'customer/rate_supplier.html', {'order': order})
 
 
+def nearby_suppliers(request):
+    profile = request.user.customerProfile
+
+    suppliers = Suppliers.objects.filter(
+        location__icontains=profile.area
+    )
+
+    return render(request, 'customer/nearby_suppliers.html', {
+        'suppliers': suppliers
+    })

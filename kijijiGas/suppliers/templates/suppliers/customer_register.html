@@ -8,80 +8,66 @@
       <h4 class="mb-0">Create Customer Account</h4>
     </div>
 
-    <div class="card-body " style="background: #fff; background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(-2px);
-    -webkit-backdrop-filter: blur(-2px);
-
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-
-    position: relative;
-    z-index: 10;">
+    <div class="card-body">
       {% if messages %}
         {% for m in messages %}
-          <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
-            {{ m }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
+          <div class="alert alert-{{ m.tags }}">{{ m }}</div>
         {% endfor %}
       {% endif %}
 
-      <form method="post" novalidate>
+      <form method="post">
         {% csrf_token %}
-        {{ form.non_field_errors }}
 
         <!-- Username -->
         <div class="mb-3">
           <label class="form-label">Username</label>
-          {{ form.username|add_class:"form-control form-control-lg" }}
-          {% if form.username.errors %}
-            <div class="form-text text-danger">
-              {{ form.username.errors|join:", " }}
-            </div>
-          {% endif %}
+          {{ form.username|add_class:"form-control" }}
         </div>
 
         <!-- Email -->
         <div class="mb-3">
-          <label class="form-label">Email address</label>
-          {{ form.email|add_class:"form-control form-control-lg" }}
-          <div class="form-text">We'll send order updates to this email (optional).</div>
-          {% if form.email.errors %}
-            <div class="form-text text-danger">
-              {{ form.email.errors|join:", " }}
-            </div>
-          {% endif %}
+          <label class="form-label">Email</label>
+          {{ form.email|add_class:"form-control" }}
+        </div>
+
+        <!-- County -->
+        <div class="mb-3">
+          <label class="form-label">County</label>
+          {{ form.county|add_class:"form-control" }}
+        </div>
+
+        <!-- Area -->
+        <div class="mb-3">
+          <label class="form-label">Area / Town</label>
+          {{ form.area|add_class:"form-control" }}
+        </div>
+
+        <!-- Exact Location -->
+        <div class="mb-3">
+          <label class="form-label">Exact Location (optional)</label>
+          {{ form.exact_location|add_class:"form-control" }}
         </div>
 
         <!-- Password -->
         <div class="mb-3">
           <label class="form-label">Password</label>
-          {{ form.password1|add_class:"form-control form-control-lg" }}
-          {% if form.password1.errors %}
-            <div class="form-text text-danger">
-              {{ form.password1.errors|join:", " }}
-            </div>
-          {% endif %}
+          {{ form.password1|add_class:"form-control" }}
         </div>
 
         <!-- Confirm Password -->
         <div class="mb-3">
-          <label class="form-label">Confirm password</label>
-          {{ form.password2|add_class:"form-control form-control-lg" }}
-          {% if form.password2.errors %}
-            <div class="form-text text-danger">
-              {{ form.password2.errors|join:", " }}
-            </div>
-          {% endif %}
+          <label class="form-label">Confirm Password</label>
+          {{ form.password2|add_class:"form-control" }}
         </div>
 
-        <button type="submit" class="btn" style="background:#FBC02D; color:#0D47A1; width:100%; padding:.75rem; font-weight:600;">
-          Create account
+        <button type="submit" class="btn btn-warning w-100 fw-bold">
+          Create Account
         </button>
 
         <div class="text-center mt-3">
-          <small class="text-muted">Already have an account? <a href="{% url 'user_login' %}">Log in</a></small>
+          <small>Already have an account?
+            <a href="{% url 'user_login' %}">Log in</a>
+          </small>
         </div>
       </form>
     </div>

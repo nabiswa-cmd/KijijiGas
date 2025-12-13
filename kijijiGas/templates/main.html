@@ -8,8 +8,6 @@
 
   
   <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-
-
   <style>
     :root {
       --primary: #0D47A1;
@@ -147,6 +145,14 @@
   <div class="bg-circle circle-faint"></div>
 
   {% include 'nav.html' %}
+{% if messages %}
+      {% for m in messages %}
+        <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+          {{ m }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+  {% endif %}
 
   <div class="container py-4">
     {% block content %}

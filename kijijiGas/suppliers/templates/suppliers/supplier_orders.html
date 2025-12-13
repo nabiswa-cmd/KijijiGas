@@ -8,9 +8,11 @@
         <tr>
             <th>ID</th>
             <th>Customer</th>
+            <th>Location</th>
             <th>Qty</th>
             <th>Status</th>
             <th>Action</th>
+            <th>Remove order</th>
         </tr>
     </thead>
 
@@ -18,7 +20,8 @@
         {% for order in orders %}
         <tr>
             <td>{{ order.id }}</td>
-            <td>{{ order.customer.username }}</td>
+            <td>{{ order.customer_name }}</td>
+            <td>{{ order.customer_location }}</td>
             <td>{{ order.quantity }}</td>
 
             <!-- FIXED STATUS DISPLAY -->
@@ -42,7 +45,9 @@
 
             <!-- ACTION BUTTONS -->
             <td>
+            
                 {% if order.status == "Pending" %}
+                   
                     <a href="{% url 'mark_on_the_way' order.id %}" class="btn btn-sm btn-info">Start Delivery</a>
 
                 {% elif order.status == "on the Way" %}
@@ -57,6 +62,9 @@
                 {% else %}
                     ---
                 {% endif %}
+            </td>
+            <td>
+                 <a href="{% url 'cancel_order1' order.id %}" class="btn btn-sm btn-danger"> Cancel Order made</a>
             </td>
 
         </tr>

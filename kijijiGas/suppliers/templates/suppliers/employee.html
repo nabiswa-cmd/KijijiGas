@@ -1,0 +1,15 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <select name="employee" class="form-select">
+    <option value="">Supplier delivers</option>
+    {% for emp in employees %}
+      <option value="{{ emp.id }}">{{ emp.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-info mt-2">Start Delivery</button>
+</form>
+
+{%endblock%}
