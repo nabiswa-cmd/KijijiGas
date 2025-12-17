@@ -197,7 +197,8 @@ MIT License — free to use, modify and improve.
 ## 👤 Author
 **Nabiswa James**  
 📧 Email: nabiswaj8@gmail.com  
-🌐 GitHub: https://github.com/<nabiswa-cmd>/  
+🌐 GitHub: https://github.com/<nabiswa-cmd>/
 
+test it out for free on https://kijijigas-production.up.railway.app/
 ---
 
