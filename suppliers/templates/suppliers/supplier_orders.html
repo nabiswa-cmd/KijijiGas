@@ -62,7 +62,7 @@
                 {% else %}
                     ---
                 {% endif %}
-                 <a href="{% url 'my_messages' order.id %}" class="btn btn-sm btn-danger">Send message</a>
+                 <a href="{% url 'my_messages' order.id %}"  class="btn btn-sm btn-outline-primary mb-1">Send message</a>
             </td>
             <td>
                  <a href="{% url 'cancel_order1' order.id %}" class="btn btn-sm btn-danger"> Cancel Order made</a>
