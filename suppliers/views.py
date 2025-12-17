@@ -250,33 +250,35 @@ def payment_form(request, order_id):
     message = None
 
     if request.method == "POST":
-        method = request.POST.get("payment_method")
+        cash_paid = float(request.POST.get("cash_paid", 0))
+        mpesa_paid = float(request.POST.get("mpesa_paid", 0))
+        customer_phone = request.POST.get("customer_phone")
 
         # 🔹 CASH PAYMENT
-        if method == "cash":
+        if cash_paid > 0:
             order.payment_method = "cash"
-            order.amount_paid = amount
+            order.amount_paid = cash_paid
             order.payment_status = "paid"
             order.save()
 
             # credit supplier wallet
             wallet, _ = SupplierWallet.objects.get_or_create(supplier=order.supplier)
-            wallet.credit(amount)
+            wallet.credit(cash_paid)
 
             return redirect("supplier_orders")
 
         # 🔹 MPESA PAYMENT
-        elif method == "mpesa":
+        elif mpesa_paid > 0:
             order.payment_method = "mpesa"
-            order.amount_paid = amount
+            order.amount_paid = mpesa_paid
             order.payment_status = "payment_pending"
             order.save()
 
             # ✅ Correct STK Push call
-            send_stk_push(
+            send_stk_push(request,
                 order=order,
-                phone_number=order.customer_phone,
-                amount=amount
+                phone_number=customer_phone,
+                amount=mpesa_paid
             )
 
             message = "STK Push sent to customer."
@@ -288,7 +290,7 @@ def payment_form(request, order_id):
     })
 
 @login_required
-def send_stk_push(order, phone_number, amount):
+def send_stk_push(request, order, phone_number, amount):
     supplier = order.supplier
     supplier_name = supplier.name
 
