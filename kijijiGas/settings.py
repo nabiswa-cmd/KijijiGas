@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from decouple import config
 import dj_database_url
+import sys
 
 # ----------------------------
 # Paths
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
 # ----------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # serve static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,18 +74,20 @@ WSGI_APPLICATION = 'kijijiGas.wsgi.application'
 # ----------------------------
 # Database
 # ----------------------------
+# Use DATABASE_URL by default
+db_url = config('DATABASE_URL', default='sqlite:///db.sqlite3')
 
-# ----------------------------
-# Database
-# ----------------------------
+# If DIRECT_URL is set and we're running migrate, use that instead
+if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
+    db_url = config('DIRECT_URL', default=db_url)
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL', default='sqlite:///db.sqlite3'),
+        default=db_url,
         conn_max_age=600,
         ssl_require=True
     )
 }
-
 
 # ----------------------------
 # Password validation
@@ -113,6 +117,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Enable WhiteNoise compressed storage
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # ----------------------------
 # Default primary key
 # ----------------------------
@@ -126,4 +133,3 @@ MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET', default='')
 MPESA_SHORTCODE = config('MPESA_SHORTCODE', default='')
 MPESA_PASSKEY = config('MPESA_PASSKEY', default='')
 MPESA_CALLBACK_URL = config('MPESA_CALLBACK_URL', default='')
-
