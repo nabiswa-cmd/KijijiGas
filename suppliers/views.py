@@ -274,14 +274,13 @@ def payment_form(request, order_id):
             order.payment_status = "payment_pending"
             order.save()
 
-            # ✅ Correct STK Push call
-            send_stk_push(request,
-                order=order,
-                phone_number=customer_phone,
-                amount=mpesa_paid
-            )
+            # ✅ Call STK Push safely
+            result = send_stk_push(request, order, customer_phone, mpesa_paid)
 
-            message = "STK Push sent to customer."
+            if "error" in result:
+                message = f"STK Push failed: {result['error']}"
+            else:
+                message = "STK Push sent to customer."
 
     return render(request, "suppliers/payment_form.html", {
         "order": order,
@@ -289,6 +288,7 @@ def payment_form(request, order_id):
         "message": message
     })
 
+@login_required
 @login_required
 def send_stk_push(request, order, phone_number, amount):
     supplier = order.supplier
@@ -301,6 +301,7 @@ def send_stk_push(request, order, phone_number, amount):
         (settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp).encode()
     ).decode()
 
+    # 🔹 Get access token
     auth_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
     auth_response = requests.get(
         auth_url,
@@ -310,7 +311,14 @@ def send_stk_push(request, order, phone_number, amount):
         )
     )
 
-    access_token = auth_response.json().get("access_token")
+    try:
+        auth_data = auth_response.json()
+    except ValueError:
+        return {"error": f"Auth failed. Status: {auth_response.status_code}, Body: {auth_response.text}"}
+
+    access_token = auth_data.get("access_token")
+    if not access_token:
+        return {"error": "No access token returned from Safaricom"}
 
     payload = {
         "BusinessShortCode": settings.MPESA_SHORTCODE,
@@ -334,7 +342,11 @@ def send_stk_push(request, order, phone_number, amount):
     stk_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
     response = requests.post(stk_url, json=payload, headers=headers)
 
-    return response.json()
+    try:
+        return response.json()
+    except ValueError:
+        return {"error": f"STK Push failed. Status: {response.status_code}, Body: {response.text}"}
+
 
 @login_required
 def edit_supplier_profile(request):
@@ -449,7 +461,10 @@ def mark_cash_paid(request, order_id):
 
 @csrf_exempt
 def mpesa_callback(request):
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({"error": "Invalid JSON in callback"}, status=400)
 
     try:
         callback = data['Body']['stkCallback']
@@ -482,7 +497,7 @@ def mpesa_callback(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
- 
+
 @login_required
 def send_order_message(request, order_id):
     order = get_object_or_404(Order, id=order_id)
