@@ -2,3 +2,11 @@ myenv
 .env
 db.sqlite3
 kijijiGas/db.sqlite3
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore collected static files
+staticfiles/
