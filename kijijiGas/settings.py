@@ -74,19 +74,19 @@ WSGI_APPLICATION = 'kijijiGas.wsgi.application'
 # ----------------------------
 # Database
 # ----------------------------
-# Use DATABASE_URL by default
 db_url = config('DATABASE_URL', default='sqlite:///db.sqlite3')
 
-# If DIRECT_URL is set and we're running migrate, use that instead
 if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
     db_url = config('DIRECT_URL', default=db_url)
 
+db_config = dj_database_url.parse(db_url, conn_max_age=600)
+
+# Only PostgreSQL needs sslmode
+if db_config['ENGINE'] == 'django.db.backends.postgresql':
+    db_config['OPTIONS'] = {'sslmode': 'require'}
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=db_url,
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': db_config
 }
 
 # ----------------------------
