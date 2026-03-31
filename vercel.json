@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "src": "kijijiGas/wsgi.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "15mb" }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "kijijiGas/wsgi.py"
+    }
+  ],
+  "env": {
+    "DISABLE_COLLECTSTATIC": "1"
+  }
+}

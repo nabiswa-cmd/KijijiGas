@@ -137,4 +137,12 @@ MPESA_CALLBACK_URL = config('MPESA_CALLBACK_URL', default='')
 CSRF_TRUSTED_ORIGINS = [
     'https://kijijigas-production.up.railway.app',
     'https://kijijigas.com',
+    'https://kijiji-gas.vercel.app'
 ]
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+import os
+
+if os.getenv("DISABLE_COLLECTSTATIC") == "1":
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
