@@ -14,7 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ----------------------------
 SECRET_KEY = config('SECRET_KEY', default='unsafe-secret-key')
 DEBUG = True
-ALLOWED_HOSTS = ['*']  # adjust for production
+ALLOWED_HOSTS = ['*']
+
+# Detect Vercel
+ON_VERCEL = os.getenv("VERCEL") == "1" or os.getenv("DISABLE_COLLECTSTATIC") == "1"
 
 # ----------------------------
 # Installed apps
@@ -37,7 +40,13 @@ INSTALLED_APPS = [
 # ----------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # serve static files in production
+]
+
+# Only use WhiteNoise if NOT on Vercel
+if not ON_VERCEL:
+    MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
+
+MIDDLEWARE += [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,7 +90,6 @@ if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
 
 db_config = dj_database_url.parse(db_url, conn_max_age=600)
 
-# Only PostgreSQL needs sslmode
 if db_config['ENGINE'] == 'django.db.backends.postgresql':
     db_config['OPTIONS'] = {'sslmode': 'require'}
 
@@ -111,14 +119,18 @@ USE_TZ = True
 # Static & Media Files
 # ----------------------------
 STATIC_URL = '/static/'
+
+# Only use STATIC_ROOT + WhiteNoise in real servers (NOT Vercel)
+if not ON_VERCEL:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# Enable WhiteNoise compressed storage
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # ----------------------------
 # Default primary key
@@ -134,15 +146,11 @@ MPESA_SHORTCODE = config('MPESA_SHORTCODE', default='')
 MPESA_PASSKEY = config('MPESA_PASSKEY', default='')
 MPESA_CALLBACK_URL = config('MPESA_CALLBACK_URL', default='')
 
+# ----------------------------
+# CSRF Trusted Origins
+# ----------------------------
 CSRF_TRUSTED_ORIGINS = [
     'https://kijijigas-production.up.railway.app',
     'https://kijijigas.com',
     'https://kijiji-gas.vercel.app'
 ]
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-import os
-
-if os.getenv("DISABLE_COLLECTSTATIC") == "1":
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
