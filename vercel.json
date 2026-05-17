@@ -1,14 +1,20 @@
 {
+  "version": 2,
+  "buildCommand": "bash build.sh",
   "builds": [
     {
-      "src": "kijijigas/wsgi.py",
-      "use": "@vercel/python"
+      "src": "kijijiGas/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.12"
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "kijijigas/wsgi.py"
+      "dest": "kijijiGas/wsgi.py"
     }
   ]
 }
